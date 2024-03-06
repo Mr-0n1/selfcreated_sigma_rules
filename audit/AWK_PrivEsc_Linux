@@ -1,0 +1,32 @@
+title: AWK Linux Privilege Escalation - Auditd
+id: (some numbers)
+status: test
+description: Detects when a malicious adversary executes an AWKc command in order to get a root shell by sudoers.
+references:
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1548.003/T1548.003.md
+    - https://github.com/RoqueNight/Linux-Privilege-Escalation-Basics
+author: 'Elliot Reyes (a.k.a Mr_0n1)'
+date: 2023/03/05
+tags:
+    - attack.privilege_escalation
+    - attack.defense_evasion
+    - attack.t1548.003
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection:
+        type: 'EXECVE'
+        a0|contains:
+            - 'sudo'
+        a1|contains:
+            - 'awk'
+  # You need to convert a2 from HEX to ASCII
+	# Try this : | eval arg=urldecode(ltrim(replace(a2,"([a-fA-F0-9]{2})","%\1"),"0x"))
+	# remove these 3 hashed commentaries before you run this test on sigmac or uncoder.io
+        arg|contains:
+            - 'BEGIN*system*bin/bash'
+    condition: selection
+falsepositives:
+    - Legitimate administration activities
+level: medium
